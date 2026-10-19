@@ -40,8 +40,10 @@ namespace _25DH110387_LTW.Models
         // Thêm trương du lieu UploadImg kieu HttpPostedFile de upload file anh
         // Dùng thuoc tính [NotMapped] de dánh dau dây là truong du lieu không luu vào DB
 
-        [RegularExpression(@"[a-zA-Z0-9\s_\\.\-:])+(.png|.jpg|.gif|.PNG|.JPG|.GIF)$",
-        ErrorMessage = "Chi chap nhan cac dinh dang anh PNG, JPG và GIF")]
+        [RegularExpression(
+            @"^[a-zA-Z0-9\s_\\.\-:]+\.(png|jpg|gif)$",
+            ErrorMessage = "Chỉ chấp nhận file ảnh PNG, JPG hoặc GIF."
+        )]
         [NotMapped]
         public HttpPostedFileBase UploadImg { get; set; }
 
