@@ -1,0 +1,25 @@
+﻿@model _25DH110387_LTW.Models.Category
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <div class="row align-items-center mb-3">
+            <label class="col-md-4 col-form-label text-end">Tên danh mục</label>
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.CategoryName,
+                    new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CategoryName, "",
+                    new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-4">
+                <input type="submit" value="Lưu" class="btn btn-primary" />
+                @Html.ActionLink("Quay lại danh sách", "Index", null,
+                    new { @class = "btn btn-primary" })
+            </div>
+        </div>
+
+    </div>
+</div>
