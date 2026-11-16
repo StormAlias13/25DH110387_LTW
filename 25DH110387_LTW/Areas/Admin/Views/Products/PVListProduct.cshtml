@@ -43,7 +43,7 @@
         </tbody>
     </table>
 
-    @* ===== THÊM TỪ ĐÂY ===== *@
+    
     <!-- Hiển thị phân trang -->
     <div class="pagination-container">
         @Html.PagedListPager(Model.Products, page => Url.Action("Index", new
@@ -55,7 +55,7 @@
             sortOrder = Model.SortOrder
         }))
     </div>
-    @* ===== THÊM ĐẾN ĐÂY ===== *@
+   
 }
 else
 {

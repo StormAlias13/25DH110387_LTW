@@ -1,0 +1,90 @@
+﻿@model _25DH110387_LTW.Models.ViewModel.Cart
+@{
+    ViewBag.Title = "Thông tin đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table">
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>
+                    <img src="@Url.Content(item.ProductImage)" alt="" style="max-height:40px;" />
+                    @item.ProductName
+                </td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("0")</td>
+                <td>@item.TotalPrice.ToString("0")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Thông tin giao hàng</h3>
+
+@using (Html.BeginForm("Checkout", "Payment", new { area = "" }, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="currentAddress" value="@ViewBag.CurrentAddress" />
+
+    <div class="form-group">
+        <label class="col-md-2 control-label">Địa chỉ giao hàng</label>
+        <div class="col-md-4">
+            <input type="text" name="addressDelivery" class="form-control"
+                   value="@ViewBag.CurrentAddress" placeholder="Nhập địa chỉ giao hàng" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-2 control-label">Phương thức giao hàng</label>
+        <div class="col-md-4">
+            <div class="radio"><label><input type="radio" name="shippingMethod" value="Giao hàng nhanh" data-fee="30000" required /> Giao hàng nhanh</label></div>
+            <div class="radio"><label><input type="radio" name="shippingMethod" value="Giao hàng tiết kiệm" data-fee="15000" /> Giao hàng tiết kiệm</label></div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-2 control-label">Phương thức thanh toán</label>
+        <div class="col-md-4">
+            <div class="radio"><label><input type="radio" name="paymentMethod" value="Tiền mặt" required /> Tiền mặt</label></div>
+            <div class="radio"><label><input type="radio" name="paymentMethod" value="Paypal" /> Paypal</label></div>
+            <div class="radio"><label><input type="radio" name="paymentMethod" value="Mua trước trả sau" /> Mua trước trả sau</label></div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-2 control-label">Tổng giá trị</label>
+        <div class="col-md-4">
+            <input type="text" id="totalDisplay" class="form-control" value="@Model.TotalValue().ToString("0")" readonly />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-4">
+            <button type="submit" class="btn btn-default">Đặt hàng</button>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script>
+        var baseTotal = @Model.TotalValue().ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        document.getElementById('editAddress').onclick = function () {
+            document.getElementById('newAddressGroup').style.display = 'block';
+        };
+
+        document.querySelectorAll('input[name="shippingMethod"]').forEach(function (r) {
+            r.onchange = function () {
+                var fee = parseFloat(this.getAttribute('data-fee'));
+                document.getElementById('totalDisplay').value = baseTotal + fee;
+            };
+        });
+    </script>
+}

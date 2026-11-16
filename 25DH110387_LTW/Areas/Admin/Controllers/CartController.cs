@@ -58,7 +58,7 @@ namespace _25DH110387_LTW.Controllers
                 cartService.GetCart().AddItem(product.ProductID, product.ProductImage,
                     product.ProductName, product.ProductPrice, quantity, product.Category.CategoryName);
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index2");
         }
 
         // Xóa sản phẩm khỏi giỏ
@@ -66,14 +66,14 @@ namespace _25DH110387_LTW.Controllers
         {
             var cartService = GetCartService();
             cartService.GetCart().RemoveItem(id);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index2");
         }
 
         // Làm trống giỏ hàng
         public ActionResult ClearCart()
         {
             GetCartService().ClearCart();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index2");
         }
 
         [HttpPost]
@@ -81,7 +81,7 @@ namespace _25DH110387_LTW.Controllers
         {
             var cartService = GetCartService();
             cartService.GetCart().UpdateQuantity(id, quantity);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index2");
         }
     }
 }

@@ -1,11 +1,14 @@
 ﻿/*Style cho phần BANNER*/
 .banner {
-    background-image: url('../../images/banner.jpg');
+    background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)), url('../Images/banner.jpg');
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
+    min-height: 360px;
+    padding: 0;
 }
 
 .banner-container {
@@ -18,7 +21,7 @@
     }
 
     .banner-container p {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
 .btnBanner {

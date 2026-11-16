@@ -1,58 +1,85 @@
 ﻿@model IEnumerable<_25DH110387_LTW.Models.Customer>
-
-@{
-    ViewBag.Title = "Index";
+@{ ViewBag.Title = "Quản lý khách hàng";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-}
+    }
 
-<h2>Index</h2>
+<style>
+    .box-head {
+        background: #dff0d8;
+        padding: 14px 18px;
+    }
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.CustomerName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CustomerPhone)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CustomerEmail)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CustomerAddress)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.User.Password)
-        </th>
-        <th></th>
-    </tr>
+        .box-head h4 {
+            margin: 0;
+            color: #3c763d;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.CustomerName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CustomerPhone)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CustomerEmail)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.CustomerAddress)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.User.Password)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.CustomerID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.CustomerID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.CustomerID })
-        </td>
-    </tr>
-}
+    .tbl-green th {
+        background: #dff0d8;
+        color: #3c763d;
+        text-transform: uppercase;
+    }
 
-</table>
+    .box {
+        border: 1px solid #ddd;
+    }
+</style>
+
+<div class="box mt-3">
+    <div class="box-head"><h4>Quản lý khách hàng</h4></div>
+
+    @using (Html.BeginForm("DeleteSelected", "Customers", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <table class="table tbl-green mb-0">
+            <thead>
+                <tr>
+                    <th style="width:40px"></th>
+                    <th>Mã KH</th>
+                    <th>Họ và tên</th>
+                    <th>Số điện thoại</th>
+                    <th>Địa chỉ email</th>
+                    <th>Địa chỉ</th>
+                    <th>Tài khoản</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><input type="checkbox" name="ids" value="@item.CustomerID" class="chk" /></td>
+                        <td>@item.CustomerID</td>
+                        <td>@item.CustomerName</td>
+                        <td>@item.CustomerPhone</td>
+                        <td>@item.CustomerEmail</td>
+                        <td>@item.CustomerAddress</td>
+                        <td>@item.Username</td>
+                        <td>
+                            @Html.ActionLink("Sửa", "Edit", new { id = item.CustomerID }) |
+                            @Html.ActionLink("Chi tiết", "Details", new { id = item.CustomerID })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="p-3 border-top">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleAll(true)">Chọn tất cả</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleAll(false)">Bỏ chọn tất cả</button>
+            <button type="submit" class="btn btn-outline-secondary"
+                    onclick="return confirm('Xóa các khách hàng đã chọn?');">
+                Xóa các mục chọn
+            </button>
+            @Html.ActionLink("Nhập thêm", "Create", null, new { @class = "btn btn-outline-secondary" })
+        </div>
+    }
+</div>
+
+<script>
+  function toggleAll(state) {
+    document.querySelectorAll('.chk').forEach(function (c) { c.checked = state; });
+  }
+</script>

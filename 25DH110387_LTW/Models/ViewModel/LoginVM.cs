@@ -13,6 +13,7 @@ namespace _25DH110387_LTW.Models.ViewModel
         public string Username { get; set; }
 
         [Required]
+        [StringLength(50, MinimumLength = 5, ErrorMessage = "Mật khẩu từ 5 đến 50 ký tự")]
         [DataType(DataType.Password)]
         [Display(Name = "Mật khẩu")]
         public string Password { get; set; }

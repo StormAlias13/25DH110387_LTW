@@ -80,7 +80,7 @@
                                 @foreach (var item in categoryGroup)
                                 {
                                     <tr>
-                                        <td><img src="@item.ProductImage" alt="@item.ProductName" style="max-height:80px;" /></td>
+                                        <td><img src="@Url.Content(item.ProductImage)" alt="@item.ProductName" style="max-height:80px;" /></td>
                                         <td class="col-md-3">@item.ProductName</td>
                                         <td>
                                             @using (Html.BeginForm("UpdateQuantity", "Cart", FormMethod.Post))
