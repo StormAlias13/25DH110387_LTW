@@ -94,7 +94,6 @@ namespace _25DH110387_LTW.Controllers
                     TotalAmount = model.TotalAmount,
                     PaymentStatus = paymentStatus,
                     PaymentMethod = model.PaymentMethod,
-                    ShippingMethod = model.ShippingMethod,
                     ShippingAddress = model.ShippingAddress,
                     OrderDetails = cart.Select(item => new OrderDetail
                     {
@@ -117,6 +116,108 @@ namespace _25DH110387_LTW.Controllers
             }
 
             return View(model);
+        }
+
+        private static readonly string[] OrderStatuses =
+            { "Chờ thanh toán", "Đang xử lý", "Đang vận chuyển", "Đã giao", "Đã hủy" };
+
+        // GET: Order/MyOrder
+        public ActionResult MyOrder(string tab = "all", string q = null, string more = null)
+        {
+            var username = Session["Username"] as string;
+            if (username == null)
+                return RedirectToAction("Login", "Account",
+                    new { area = "Admin", returnUrl = Url.Action("MyOrder", "Order", new { area = "" }) });
+
+            var customer = db.Customers.FirstOrDefault(c => c.Username == username);
+            if (customer == null)
+                return RedirectToAction("Index", "Home", new { area = "" });
+
+            var query = db.Orders.Include("OrderDetails.Product")
+                                 .Where(o => o.CustomerID == customer.CustomerID);
+
+            // Tìm theo Mã đơn hàng hoặc Tên sản phẩm
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+                int orderId;
+                if (int.TryParse(q, out orderId))
+                    query = query.Where(o => o.OrderID == orderId ||
+                                             o.OrderDetails.Any(d => d.Product.ProductName.Contains(q)));
+                else
+                    query = query.Where(o => o.OrderDetails.Any(d => d.Product.ProductName.Contains(q)));
+            }
+
+            var orders = query.OrderByDescending(o => o.OrderDate).ToList();
+
+            // Đơn có trạng thái null hoặc lạ thì coi như "Đang xử lý"
+            Func<Order, string> statusOf = o =>
+                OrderStatuses.Contains(o.OrderStatus) ? o.OrderStatus : "Đang xử lý";
+
+            // Tab "all": hiện cả 5 trạng thái. Tab khác: chỉ hiện trạng thái đó
+            var statusesToShow = (tab == "all" || !OrderStatuses.Contains(tab))
+                ? OrderStatuses
+                : new[] { tab };
+
+            var groups = new List<OrderGroupVM>();
+            foreach (var st in statusesToShow)
+            {
+                var inStatus = orders.Where(o => statusOf(o) == st).ToList();
+                if (!inStatus.Any()) continue;
+
+                bool expanded = (more == st);
+                groups.Add(new OrderGroupVM
+                {
+                    Status = st,
+                    Total = inStatus.Count,
+                    Expanded = expanded,
+                    // Mặc định 2 đơn gần nhất; bấm "Xem thêm" thì tối đa 50 đơn
+                    Orders = inStatus.Take(expanded ? 50 : 2).ToList()
+                });
+            }
+
+            return View(new MyOrderVM
+            {
+                Tab = OrderStatuses.Contains(tab) ? tab : "all",
+                Query = q,
+                Statuses = OrderStatuses.ToList(),
+                Groups = groups
+            });
+        }
+
+        
+        // POST: Order/BuyAgain/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult BuyAgain(int id)
+        {
+            var username = Session["Username"] as string;
+            if (username == null)
+                return RedirectToAction("Login", "Account",
+                    new { area = "Admin", returnUrl = Url.Action("MyOrder", "Order", new { area = "" }) });
+
+            var customer = db.Customers.FirstOrDefault(c => c.Username == username);
+            if (customer == null) { return HttpNotFound(); }
+
+            var order = db.Orders.Include("OrderDetails.Product")
+                          .FirstOrDefault(o => o.OrderID == id && o.CustomerID == customer.CustomerID);
+            if (order == null) { return HttpNotFound(); }
+
+            var cart = new CartService(Session).GetCart();
+            foreach (var d in order.OrderDetails)
+            {
+                // Thêm mỗi sản phẩm của đơn cũ vào giỏ với số lượng = 1
+                cart.AddItem(
+                    d.ProductID,
+                    d.Product.ProductImage,
+                    d.Product.ProductName,
+                    d.UnitPrice,
+                    1,
+                    ""   // category: xem ghi chú bên dưới
+                );
+            }
+
+            return RedirectToAction("Index2", "Cart", new { area = "" });
         }
         public ActionResult OrderSuccess(int id)
         {

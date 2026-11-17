@@ -24,7 +24,7 @@ namespace _25DH110387_LTW.Models.ViewModel
         public string PaymentMethod { get; set; }
 
         [Display(Name = "Phương thức giao hàng")]
-        public string ShippingMethod { get; set; }
+        public string DeliveryMethod { get; set; }
 
         [Display(Name = "Địa chỉ giao hàng")]
         public string ShippingAddress { get; set; }

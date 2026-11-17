@@ -23,14 +23,13 @@ namespace _25DH110387_LTW.Models
     public partial class Order
     {
         
-        public string PaymentMethod { get; set; }
-        public string ShippingMethod { get; set; }
-        public string ShippingAddress { get; set; }
+       
+       
 
     }
     [MetadataType(typeof(OrderDetailMetadata))]
     public partial class OrderDetail
     {
-        public Nullable<decimal> TotalPrice { get; set; }
+        
     }
 }

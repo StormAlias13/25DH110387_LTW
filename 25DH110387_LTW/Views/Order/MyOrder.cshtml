@@ -1,0 +1,169 @@
+﻿@model _25DH110387_LTW.Models.ViewModel.MyOrderVM
+@{
+    ViewBag.Title = "Đơn hàng của tôi";
+    // Đổi đường dẫn thư mục ảnh sản phẩm cho đúng project
+    Func<string, string> img = f => Url.Content("~/Content/images/" + f);
+}
+
+<style>
+    .mo-wrap {
+        background: #fff;
+        color: #222;
+        padding: 16px 20px;
+        border-radius: 4px;
+    }
+
+        .mo-wrap a {
+            color: #0d6efd;
+        }
+
+    .mo-tabs a {
+        display: inline-block;
+        padding: 10px 18px;
+        color: #555;
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+    }
+
+        .mo-tabs a.active {
+            color: #0d6efd;
+            border-bottom-color: #0d6efd;
+        }
+
+    .mo-card {
+        background: #fff;
+        color: #222;
+        border-radius: 4px;
+        padding: 14px 18px;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    }
+
+    .mo-status {
+        font-weight: 600;
+        color: #555;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+    }
+
+    .mo-item {
+        display: flex;
+        gap: 14px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .mo-item img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border: 1px solid #eee;
+        }
+
+        .mo-item .price {
+            margin-left: auto;
+        }
+
+    .mo-foot {
+        text-align: right;
+        margin-top: 12px;
+    }
+
+        .mo-foot .total {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+</style>
+
+<div class="mo-wrap">
+    <h3>Đơn hàng của tôi</h3>
+
+    <div class="mo-tabs">
+        <a href="@Url.Action("MyOrder", new { tab = "all", q = Model.Query })" class="@(Model.Tab == "all" ? "active" : "")">Tất cả đơn</a>
+        @foreach (var s in Model.Statuses)
+        {
+            <a href="@Url.Action("MyOrder", new { tab = s, q = Model.Query })" class="@(Model.Tab == s ? "active" : "")">@s</a>
+        }
+    </div>
+
+    @using (Html.BeginForm("MyOrder", "Order", FormMethod.Get, new { @class = "form-inline", style = "margin:14px 0;" }))
+    {
+        <input type="hidden" name="tab" value="@Model.Tab" />
+        <input type="text" name="q" value="@Model.Query" class="form-control" style="width:75%"
+               placeholder="Tìm đơn hàng theo Mã đơn hàng hoặc Tên sản phẩm" />
+        <button type="submit" class="btn btn-primary">Tìm đơn hàng</button>
+    }
+
+    @if (!Model.Groups.Any())
+    {
+        <div class="mo-card text-center">
+            <p><strong>BẠN CHƯA CÓ ĐƠN HÀNG NÀO. HÃY ĐẶT ĐƠN NGAY.</strong></p>
+            <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-primary">Về trang chủ</a>
+        </div>
+    }
+
+    @foreach (var g in Model.Groups)
+    {
+        <div class="mo-status" style="margin-top:20px">@g.Status (@g.Total)</div>
+
+        foreach (var o in g.Orders)
+        {
+            var items = o.OrderDetails.ToList();
+            <div class="mo-card">
+                <div class="mo-status">Đơn #@o.OrderID &middot; @o.OrderDate.ToString("dd/MM/yyyy HH:mm") &middot; @g.Status</div>
+
+                @for (int i = 0; i < items.Count; i++)
+                {
+                    var d = items[i];
+                    <div class="mo-item" @(i >= 2 ? "style=display:none data-extra=" + o.OrderID : "")>
+                        <img src="@img(d.Product.ProductImage)" alt="" />
+                        <div>
+                            <div>@d.Product.ProductName</div>
+                            <small class="text-muted">x@(d.Quantity)</small>
+                        </div>
+                        <div class="price">@((d.Quantity * d.UnitPrice).ToString("N0")) ₫</div>
+                    </div>
+                }
+
+                @if (items.Count > 2)
+                {
+                    <button type="button" class="btn btn-default btn-sm" style="margin-top:8px"
+                            onclick="toggleExtra(@o.OrderID, this, @(items.Count - 2))">
+                        Xem thêm @(items.Count - 2) sản phẩm
+                    </button>
+                }
+
+                <div class="mo-foot">
+                    <div class="total">Tổng tiền: @o.TotalAmount.ToString("N0") ₫</div>
+                    @using (Html.BeginForm("BuyAgain", "Order", new { id = o.OrderID }, FormMethod.Post, new { style = "display:inline" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-default btn-sm">Mua lại</button>
+                    }
+                    @if (items.Any())
+                    {
+                        <a class="btn btn-default btn-sm" href="@Url.Action("ProductDetails", "Home", new { id = items[0].ProductID })">Xem chi tiết</a>
+                    }
+                </div>
+            </div>
+        }
+
+        if (!g.Expanded && g.Total > g.Orders.Count)
+        {
+            <p class="text-center">
+                <a href="@Url.Action("MyOrder", new { tab = Model.Tab, q = Model.Query, more = g.Status })">Xem thêm</a>
+            </p>
+        }
+    }
+</div>
+
+<script>
+    function toggleExtra(orderId, btn, n) {
+        var els = document.querySelectorAll('[data-extra="' + orderId + '"]');
+        var hidden = els.length && els[0].style.display === 'none';
+        els.forEach(function (e) { e.style.display = hidden ? 'flex' : 'none'; });
+        btn.textContent = hidden ? 'Thu gọn' : 'Xem thêm ' + n + ' sản phẩm';
+    }
+</script>

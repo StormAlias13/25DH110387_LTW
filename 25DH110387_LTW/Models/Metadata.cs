@@ -106,7 +106,8 @@ namespace _25DH110387_LTW.Models
         public int CustomerID { get; set; }
         public decimal TotalAmount { get; set; }
         public string PaymentStatus { get; set; }
-        public string AddressDelivery { get; set; }
+        public string ShippingAddress { get; set; }
+
     }
     public class OrderDetailMetadata 
     {

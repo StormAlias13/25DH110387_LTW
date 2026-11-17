@@ -124,7 +124,7 @@
                             @if (ViewBag.pnmodel.IsLoggedIn)
                             {
                                 <a href="@Url.Action("ProfileInfo", "Account", new { area = "Admin" })">Thông tin tài khoản</a>
-                                <a href="@Url.Action("OrderHistory", "Order",new { area = "Admin"})">Lịch sử mua hàng</a>
+                                <a href="@Url.Action("MyOrder", "Order", new { area = "" }, null)">Lịch sử mua hàng</a>
                                 <a href="@Url.Action("Logout", "Account",new { area = "Admin"})">Đăng xuất</a>
                             }
                             else

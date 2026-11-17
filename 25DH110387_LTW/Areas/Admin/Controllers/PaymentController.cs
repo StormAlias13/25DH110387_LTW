@@ -1,9 +1,11 @@
 ﻿using _25DH110387_LTW.Models;
 using _25DH110387_LTW.Models.ViewModel;
+using PayPal.Api;
 using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
+using Order = _25DH110387_LTW.Models.Order;
 
 namespace _25DH110387_LTW.Controllers
 {
@@ -41,7 +43,7 @@ namespace _25DH110387_LTW.Controllers
         // Đặt hàng
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Checkout(string addressDelivery)
+        public ActionResult Checkout(string shippingAddress)
         {
             if (Session["Username"] == null)
                 return RedirectToAction("Login", "Account", new { area = "Admin" });
@@ -50,7 +52,7 @@ namespace _25DH110387_LTW.Controllers
             if (cart == null || !cart.Items.Any())
                 return RedirectToAction("Index2", "Cart", new { area = "" });
 
-            if (string.IsNullOrWhiteSpace(addressDelivery))
+            if (string.IsNullOrWhiteSpace(shippingAddress))
             {
                 TempData["Error"] = "Vui lòng nhập địa chỉ giao hàng.";
                 return RedirectToAction("Index");
@@ -60,14 +62,16 @@ namespace _25DH110387_LTW.Controllers
             var customer = db.Customers.FirstOrDefault(c => c.Username == username);
             if (customer == null)
                 return RedirectToAction("Index2", "Cart", new { area = "" });
-
             var order = new Order
             {
                 CustomerID = customer.CustomerID,
                 OrderDate = DateTime.Now,
                 TotalAmount = cart.TotalValue(),
                 PaymentStatus = "Chưa thanh toán (COD)",
-                AddressDelivery = addressDelivery.Trim()
+                PaymentMethod = "Tiền mặt (COD)",
+                ShippingAddress = shippingAddress,         
+                DeliveryMethod = "Giao hàng tiêu chuẩn",
+                OrderStatus = "Đang xử lý"
             };
 
             foreach (var item in cart.Items)
